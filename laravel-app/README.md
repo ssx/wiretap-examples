@@ -1,8 +1,8 @@
 # wiretap — Laravel example
 
-A stock Laravel 12 app with wiretap wired in. Nothing in the application code
-mentions wiretap; the recording happens because a service provider sets a
-global Guzzle handler.
+A stock Laravel 12 app with [`ssx/wiretap-laravel`](https://github.com/ssx/wiretap-laravel)
+installed. Nothing in the application code mentions wiretap — the package is
+auto-discovered and captures Laravel's HTTP client on its own.
 
 ```bash
 composer install
@@ -47,21 +47,44 @@ were actually debugging. The Luhn check is what keeps it readable.
 
 ## The wiring
 
+There is almost none, which is the point.
+
 | File | What it does |
 | --- | --- |
-| [`config/wiretap.php`](config/wiretap.php) | blocklist, redaction paths, sampling, retention |
-| [`app/Providers/WiretapServiceProvider.php`](app/Providers/WiretapServiceProvider.php) | builds the recorder, sets the global handler, adds route/command context |
+| [`config/wiretap.php`](config/wiretap.php) | published from the package; blocklist and redaction paths filled in for this app |
 | [`app/Services/OrderApi.php`](app/Services/OrderApi.php) | a stand-in for your integration — no wiretap references |
+| [`app/Console/Commands/WiretapDemo.php`](app/Console/Commands/WiretapDemo.php) | drives the three calls and prints the result |
 
-The provider is what `ssx/wiretap-laravel` will eventually do for you. It
-lives here in full so you can read it rather than take it on trust.
+`composer require ssx/wiretap-laravel` and one `.env` line is the whole setup.
+The package registers itself through Laravel's auto-discovery.
+
+Two config values are the ones worth setting for any real project — wiretap
+cannot know which of your endpoints carry cardholder data, or which keys in
+your payloads are sensitive:
+
+```php
+'blocklist' => ['*.myacquirer.test'],          // never recorded at all
+'redaction' => ['body_paths' => ['card.cvv']], // recorded, but redacted
+```
+
+## Commands
+
+The package ships these, against this app's configured log path:
+
+```bash
+php artisan wiretap:list --failed
+php artisan wiretap:show 1 --curl
+php artisan wiretap:trace <correlation-id>
+php artisan wiretap:export --out=calls.har
+php artisan wiretap:doctor
+```
 
 ## What this example cannot capture
 
-`Http::globalOptions()` reaches Laravel's HTTP client, and the container
-binding reaches anything resolving Guzzle from the container. Neither reaches
-a `new GuzzleHttp\Client()` inside your vendor directory, and neither sees raw
-`curl_exec()` at all.
+The package hooks Laravel's HTTP client and the container's Guzzle binding.
+Neither reaches a `new GuzzleHttp\Client()` inside your vendor directory, and
+neither sees raw `curl_exec()` at all. `php artisan wiretap:doctor` says so
+explicitly rather than leaving you to wonder.
 
 For that you need [`ssx/wiretap-auto`](https://github.com/ssx/wiretap-auto),
 which hooks the functions themselves via `ext-opentelemetry` and requires no

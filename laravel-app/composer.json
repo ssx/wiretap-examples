@@ -12,8 +12,9 @@
         "php": "^8.2",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
-        "ssx/wiretap": "~0.0.1",
-        "ssx/wiretap-guzzle": "~0.0.1"
+        "ssx/wiretap": "~0.0.2",
+        "ssx/wiretap-guzzle": "~0.0.2",
+        "ssx/wiretap-laravel": "~0.0.1"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -96,6 +97,10 @@
         {
             "type": "vcs",
             "url": "https://github.com/ssx/wiretap-guzzle"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/ssx/wiretap-laravel"
         }
     ]
 }

@@ -16,22 +16,21 @@ return [
     | on a commerce site can contain cardholder data.
     |
     | Turn it on to investigate something, then turn it off again. It defaults
-    | to off outside local and testing environments for exactly that reason.
+    | to off outside local for exactly that reason.
     |
     */
 
-    'enabled' => env('WIRETAP_ENABLED', env('APP_ENV') === 'local'),
+    'enabled' => env('WIRETAP_ENABLED', false),
 
     /*
     |--------------------------------------------------------------------------
     | Blocklist
     |--------------------------------------------------------------------------
     |
-    | A URL matching any of these produces no record at all. The body is never
-    | read, the headers are never copied, nothing enters the buffer. This is a
-    | gate, not a filter — use it for anything carrying cardholder data.
+    | A URL matching any of these produces no record at all — the body is never
+    | read, the headers are never copied, nothing enters the buffer. It is a
+    | gate, not a filter. Use it for anything carrying cardholder data.
     |
-    | Patterns:
     |   api.stripe.com                exact host, any scheme or path
     |   *.adyen.com                   the host and any subdomain
     |   api.foo.com/v2/payments*      host plus path prefix
@@ -55,11 +54,12 @@ return [
     |--------------------------------------------------------------------------
     |
     | Applied at capture, never at display. Body paths use dot notation with
-    | `*` wildcards and are matched against decoded JSON, so they are precise
-    | in a way a regex over the raw text cannot be.
+    | `*` wildcards over decoded JSON, so they are precise in a way a regex
+    | over raw text cannot be.
     |
-    | Wiretap cannot know which keys in your payloads are sensitive. These are
-    | yours to set.
+    | Wiretap cannot know which keys in your payloads are sensitive. Headers,
+    | query parameters and card numbers are handled by default; the paths below
+    | are yours.
     |
     */
 
@@ -86,14 +86,33 @@ return [
     | handling one inbound request shares the same decision. Sampling per call
     | would give you half a conversation.
     |
-    | 10000 basis points = keep everything. In production you would drop this
-    | and lean on the always-keep rules.
+    | 10000 basis points keeps everything. In production you would drop this
+    | and lean on the always-keep rules below.
     |
     */
 
     'sample_rate_basis_points' => env('WIRETAP_SAMPLE_BP', 10000),
     'always_keep_failures' => true,
-    'slow_threshold_us' => 2_000_000,
+    'slow_threshold_us' => env('WIRETAP_SLOW_US', 2_000_000),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Capture surfaces
+    |--------------------------------------------------------------------------
+    |
+    | `http_client` reaches Laravel's own HTTP client. `container_guzzle` binds
+    | a recorded Guzzle client for anything resolving one from the container.
+    |
+    | Neither reaches a `new GuzzleHttp\Client()` inside your vendor directory,
+    | and neither sees raw curl_exec() at all. Install ssx/wiretap-auto for
+    | those.
+    |
+    */
+
+    'capture' => [
+        'http_client' => true,
+        'container_guzzle' => true,
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -101,7 +120,7 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    'path' => storage_path('logs/wiretap'),
+    'path' => env('WIRETAP_PATH', storage_path('logs/wiretap')),
 
     'retention_days' => env('WIRETAP_RETENTION_DAYS', 7),
 

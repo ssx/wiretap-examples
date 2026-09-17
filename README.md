@@ -8,6 +8,11 @@ Two working applications you can clone and run, showing
 | [`plain-php/`](plain-php) | none | `composer install && php run.php` |
 | [`laravel-app/`](laravel-app) | Laravel 12 | `composer install && php artisan wiretap:demo` |
 
+The Laravel example uses [`ssx/wiretap-laravel`](https://github.com/ssx/wiretap-laravel),
+which auto-discovers and needs no application code. The plain PHP example wires
+[`ssx/wiretap-guzzle`](https://github.com/ssx/wiretap-guzzle) by hand, in about
+sixty lines, so you can see what a bridge actually does.
+
 Both make the same three outbound calls against `httpbin.org`:
 
 1. A normal call carrying a bearer token, a secret query parameter, a card
