@@ -1,0 +1,5 @@
+**/vendor/
+**/composer.lock
+plain-php/var/*.ndjson
+laravel-app/storage/logs/wiretap/
+.DS_Store
