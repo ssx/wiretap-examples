@@ -1,19 +1,20 @@
 # wiretap examples
 
-Two working applications you can clone and run, showing
+Three working applications you can clone and run, showing
 [wiretap](https://github.com/ssx/wiretap) capturing real outbound HTTP calls.
 
 | Example | Framework | Run it |
 | --- | --- | --- |
 | [`plain-php/`](plain-php) | none | `composer install && php run.php` |
 | [`laravel-app/`](laravel-app) | Laravel 12 | `composer install && php artisan wiretap:demo` |
+| [`async-auto/`](async-auto) | none, `ext-opentelemetry` | `composer install && php run.php` |
 
 The Laravel example uses [`ssx/wiretap-laravel`](https://github.com/ssx/wiretap-laravel),
 which auto-discovers and needs no application code. The plain PHP example wires
 [`ssx/wiretap-guzzle`](https://github.com/ssx/wiretap-guzzle) by hand, in about
 sixty lines, so you can see what a bridge actually does.
 
-Both make the same three outbound calls against `httpbin.org`:
+The first two make the same three outbound calls against `httpbin.org`:
 
 1. A normal call carrying a bearer token, a secret query parameter, a card
    number, a CVV and a customer email.
@@ -53,7 +54,10 @@ application constructs. That covers the example code, but it cannot see:
 Capturing those needs
 [`ssx/wiretap-auto`](https://github.com/ssx/wiretap-auto), which hooks the
 functions themselves via `ext-opentelemetry` and requires no application
-changes.
+changes. [`async-auto/`](async-auto) shows exactly that: two stand-in vendor
+SDKs making a Guzzle `Pool`, `getAsync()` calls and a hand-written
+`curl_multi` batch, all captured with no wiretap code anywhere in the
+application, and without serialising the concurrent requests.
 
 ## ⚠️ These are debugging demos
 

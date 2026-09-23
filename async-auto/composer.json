@@ -1,0 +1,29 @@
+{
+    "name": "ssx/wiretap-example-async-auto",
+    "description": "Async Guzzle and raw curl_multi traffic captured by wiretap-auto, with no application changes.",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+        "php": "^8.2",
+        "ext-curl": "*",
+        "ssx/wiretap-auto": "~0.0.6",
+        "guzzlehttp/guzzle": "^7.5"
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/ssx/wiretap"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/ssx/wiretap-auto"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
